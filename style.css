@@ -697,6 +697,22 @@ select:focus-visible {
   width: 100%;
   accent-color: var(--color-aurora-2);
 }
+/* Dropdown text styling */
+.form-group select {
+  color: var(--color-text);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dropdown options */
+.form-group select option {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Placeholder/disabled option */
+.form-group select option[value=""] {
+  color: var(--color-text-muted);
+}
 
 /* -------------------- Loader -------------------- */
 .loader {
