@@ -9,15 +9,6 @@
 
 /* -------------------- Design Tokens -------------------- */
 :root {
-  
-    color-scheme: dark;
-
-
-.form-group select {
-    color-scheme: dark;
-    background: #2b2236;
-    color: #F5EFE6;
-}
   /* Colors */
   --color-bg: #120B1A;
   --color-bg-alt: #180F22;
@@ -693,6 +684,7 @@ select:focus-visible {
 .form-group select,
 .form-group input[type="text"] {
   background: rgba(255,255,255,0.05);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
@@ -702,25 +694,21 @@ select:focus-visible {
 .form-group select:focus,
 .form-group input[type="text"]:focus { border-color: var(--color-aurora-2); }
 
+/* The CLOSED <select> box picks up the dark glass theme above (light text
+   looks right against the page background). But the OPENED dropdown list
+   is drawn by the browser/OS natively — it ignores the translucent dark
+   background and defaults to a plain white/light popup, so that same
+   light text becomes nearly invisible. Styling <option> explicitly with
+   a solid light background + dark text fixes this without touching the
+   closed select's look. */
+.form-group select option {
+  background-color: #FFFFFF;
+  color: #241A33;
+}
+
 .form-group input[type="range"] {
   width: 100%;
   accent-color: var(--color-aurora-2);
-}
-/* Dropdown text styling */
-.form-group select {
-  color: var(--color-text);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* Dropdown options */
-.form-group select option {
-  background: var(--color-bg);
-  color: var(--color-text);
-}
-
-/* Placeholder/disabled option */
-.form-group select option[value=""] {
-  color: var(--color-text-muted);
 }
 
 /* -------------------- Loader -------------------- */
