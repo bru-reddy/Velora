@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velora | AI Powered Personalized Menu Recommendations</title>
+  <meta name="description" content="Velora recommends dishes tailored to your taste using free AI (Grok, via Puter.js) — no API key required." />
+
+  <!-- Google Fonts: Fraunces (display serif with character) + Plus Jakarta Sans (body) + JetBrains Mono (data/stats) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===================== NAVIGATION BAR ===================== -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="#home" class="navbar__brand">
+        <span class="navbar__logo">V</span>
+        <span class="navbar__title">Velora</span>
+      </a>
+
+      <nav class="navbar__links" id="navLinks">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#categories" class="nav-link">Categories</a>
+        <a href="#preferences" class="nav-link">Get Recommendations</a>
+        <a href="#favorites" class="nav-link">Favorites</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="btn btn--ghost" id="aiInfoBtn" title="How Velora's AI works">
+          <span class="icon">🤖</span> Powered by AI
+        </button>
+        <button class="navbar__toggle" id="navToggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO SECTION ===================== -->
+  <section class="hero" id="home">
+    <div class="hero__aurora" aria-hidden="true"></div>
+    <div class="hero__content">
+      <p class="eyebrow">AI Powered Menu Intelligence</p>
+      <h1 class="hero__title">
+        Every craving,<br />
+        <span class="text-gradient">perfectly understood.</span>
+      </h1>
+      <p class="hero__subtitle">
+        Tell Velora how you feel, what you're craving, and what you're avoiding —
+        our AI plates up dishes made for exactly that moment.
+      </p>
+
+      <!-- ===================== SEARCH BAR ===================== -->
+      <form class="search-bar" id="searchForm" role="search">
+        <span class="search-bar__icon">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-bar__input"
+          placeholder="Search dishes — e.g. paneer, sushi, tacos..."
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn--primary search-bar__btn">Search</button>
+      </form>
+
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <span class="hero__stat-number">76+</span>
+          <span class="hero__stat-label">Dishes</span>
+        </div>
+        <div class="hero__stat">
+          <span class="hero__stat-number">8</span>
+          <span class="hero__stat-label">Cuisines</span>
+        </div>
+        <div class="hero__stat">
+          <span class="hero__stat-number">AI</span>
+          <span class="hero__stat-label">Personalized</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOD CATEGORIES ===================== -->
+  <section class="section" id="categories">
+    <div class="section__header">
+      <p class="eyebrow">Browse the menu</p>
+      <h2 class="section__title">Explore by cuisine</h2>
+      <p class="section__subtitle">Filter the full Velora catalog or search above to find something specific.</p>
+    </div>
+
+    <div class="categories__grid" id="categoryGrid">
+      <!-- Category chips injected by script.js -->
+    </div>
+
+    <div class="dish-grid" id="dishGrid">
+      <!-- Dish cards injected by script.js -->
+    </div>
+
+    <div class="empty-state" id="dishEmptyState" hidden>
+      <span class="empty-state__icon">🍽️</span>
+      <h3>No dishes found</h3>
+      <p>Try a different search term or choose another cuisine.</p>
+    </div>
+  </section>
+
+  <!-- ===================== PREFERENCE FORM ===================== -->
+  <section class="section section--tinted" id="preferences">
+    <div class="section__header">
+      <p class="eyebrow">Tell us what you're craving</p>
+      <h2 class="section__title">Get your personalized recommendations</h2>
+      <p class="section__subtitle">Free AI analyzes your preferences and plates up 6 dishes made for you — no signup, no API key.</p>
+    </div>
+
+    <form class="pref-form glass-card" id="preferenceForm">
+      <div class="pref-form__grid">
+
+        <div class="form-group">
+          <label for="dietType">Diet Type</label>
+          <select id="dietType" required>
+            <option value="Vegetarian">Vegetarian</option>
+            <option value="Non-Vegetarian">Non-Vegetarian</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cuisine">Preferred Cuisine</label>
+          <select id="cuisine" required>
+            <option value="Any">Any / Surprise me</option>
+            <!-- cuisine options injected by script.js -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="budget">Budget (₹ per dish): <span id="budgetValue">250</span></label>
+          <input type="range" id="budget" min="40" max="400" step="10" value="250" />
+        </div>
+
+        <div class="form-group">
+          <label for="spiceLevel">Spice Level: <span id="spiceValue">Medium</span></label>
+          <input type="range" id="spiceLevel" min="0" max="3" step="1" value="1" />
+        </div>
+
+        <div class="form-group">
+          <label for="mealType">Meal Type</label>
+          <select id="mealType" required>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch" selected>Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snack">Snack</option>
+            <option value="dessert">Dessert</option>
+            <option value="beverage">Beverage</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="calories">Calorie Preference</label>
+          <select id="calories" required>
+            <option value="Low (under 300 kcal)">Low (under 300 kcal)</option>
+            <option value="Moderate (300-500 kcal)" selected>Moderate (300-500 kcal)</option>
+            <option value="High (500+ kcal)">High (500+ kcal)</option>
+            <option value="No preference">No preference</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="allergies">Allergies (comma separated)</label>
+          <input type="text" id="allergies" placeholder="e.g. peanuts, shellfish, dairy" />
+        </div>
+
+        <div class="form-group">
+          <label for="mood">Mood</label>
+          <select id="mood" required>
+            <option value="Happy / Celebratory">Happy / Celebratory</option>
+            <option value="Comfort seeking" selected>Comfort seeking</option>
+            <option value="Adventurous">Adventurous</option>
+            <option value="Stressed / Need something light">Stressed / Need something light</option>
+            <option value="Romantic">Romantic</option>
+            <option value="Energetic / Post-workout">Energetic / Post-workout</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--large" id="getRecsBtn">
+        <span class="icon">✨</span> Get AI Recommendations
+      </button>
+    </form>
+  </section>
+
+  <!-- ===================== RECOMMENDATION SECTION ===================== -->
+  <section class="section" id="recommendations">
+    <div class="section__header">
+      <p class="eyebrow">Curated for you</p>
+      <h2 class="section__title">Your AI recommendations</h2>
+      <p class="section__subtitle">Powered by Grok (via Puter.js), grounded in Velora's menu.</p>
+    </div>
+
+    <!-- Loading animation -->
+    <div class="loader" id="loader" hidden>
+      <div class="loader__plate">
+        <div class="loader__spinner"></div>
+      </div>
+      <p class="loader__text">Velora's AI chef is plating your recommendations...</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-state" id="errorState" hidden>
+      <span class="error-state__icon">⚠️</span>
+      <h3 id="errorTitle">Something went wrong</h3>
+      <p id="errorMessage">Please try again.</p>
+      <button class="btn btn--outline" id="errorRetryBtn">Try Again</button>
+    </div>
+
+    <!-- Empty state (before first submission) -->
+    <div class="empty-state" id="recsEmptyState">
+      <span class="empty-state__icon">🤖</span>
+      <h3>No recommendations yet</h3>
+      <p>Fill out your preferences above and let Velora's AI find your perfect dishes.</p>
+    </div>
+
+    <div class="rec-grid" id="recGrid"></div>
+  </section>
+
+  <!-- ===================== FAVORITES SECTION ===================== -->
+  <section class="section section--tinted" id="favorites">
+    <div class="section__header">
+      <p class="eyebrow">Saved for later</p>
+      <h2 class="section__title">Your favorites</h2>
+      <p class="section__subtitle">Dishes you've hearted, saved locally on this device.</p>
+    </div>
+
+    <div class="dish-grid" id="favoritesGrid"></div>
+
+    <div class="empty-state" id="favoritesEmptyState">
+      <span class="empty-state__icon">💛</span>
+      <h3>No favorites yet</h3>
+      <p>Tap the heart icon on any dish or recommendation card to save it here.</p>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="navbar__logo">V</span>
+        <span class="navbar__title">Velora</span>
+      </div>
+      <p class="footer__tagline">AI Powered Personalized Menu Recommendation System</p>
+
+      <div class="footer__links">
+        <a href="#home">Home</a>
+        <a href="#categories">Categories</a>
+        <a href="#preferences">Recommendations</a>
+        <a href="#favorites">Favorites</a>
+      </div>
+
+      <p class="footer__note">Built with HTML, CSS &amp; JavaScript · AI powered by Grok via Puter.js (free, no API key)</p>
+      <p class="footer__copyright">&copy; 2026 Velora. A Computer Science Mini Project.</p>
+    </div>
+  </footer>
+
+  <!-- ===================== ABOUT AI MODAL ===================== -->
+  <div class="modal" id="aiInfoModal" hidden>
+    <div class="modal__backdrop" id="modalBackdrop"></div>
+    <div class="modal__box glass-card">
+      <button class="modal__close" id="modalCloseBtn" aria-label="Close">&times;</button>
+      <h3>How Velora's AI works</h3>
+      <p class="modal__text">
+        Velora generates recommendations using <strong>Grok</strong> (xAI), served for free
+        through <strong>Puter.js</strong> — no API key, no signup fee, and no backend required.
+        The first time you request recommendations, your browser may show a quick, free,
+        one-time Puter sign-in popup so usage is tied to you instead of to Velora's source code.
+        After that, recommendations generate instantly.
+      </p>
+      <div class="modal__actions">
+        <button class="btn btn--primary" id="modalGotItBtn">Got it</button>
+        <a href="https://puter.com" target="_blank" rel="noopener" class="btn btn--outline">About Puter.js</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST NOTIFICATION ===================== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Scripts: data first, then Puter.js (free, keyless AI engine),
+       then the AI module, then main app logic -->
+  <script src="data.js"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="ai.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
