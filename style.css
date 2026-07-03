@@ -9,6 +9,15 @@
 
 /* -------------------- Design Tokens -------------------- */
 :root {
+  
+    color-scheme: dark;
+
+
+.form-group select {
+    color-scheme: dark;
+    background: #2b2236;
+    color: #F5EFE6;
+}
   /* Colors */
   --color-bg: #120B1A;
   --color-bg-alt: #180F22;
