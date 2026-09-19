@@ -52,7 +52,7 @@ function validateRecommendations(recommendations) {
   }));
 }
 
-async function getAIRecommendations(prefs) {
+window.getAIRecommendations = async function getAIRecommendations(prefs) {
   const apiUrl = getApiBaseUrl();
   const menu = filterDishesForContext(prefs);
 
