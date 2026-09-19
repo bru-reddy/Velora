@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Velora | AI Powered Personalized Menu Recommendations</title>
-  <meta name="description" content="Velora recommends dishes tailored to your taste using AI via Puter.js — no provider API key required." />
+  <meta name="description" content="Velora uses Gemini AI to generate personalized menu recommendations based on taste, diet, budget, mood, and dietary restrictions." />
 
   <!-- Google Fonts: Fraunces (display serif with character) + Plus Jakarta Sans (body) + JetBrains Mono (data/stats) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -113,7 +113,7 @@
     <div class="section__header">
       <p class="eyebrow">Tell us what you're craving</p>
       <h2 class="section__title">Get your personalized recommendations</h2>
-      <p class="section__subtitle">AI analyzes your preferences and plates up 6 dishes made for you — no provider API key required.</p>
+      <p class="section__subtitle">Gemini AI analyzes your preferences and plates up 6 personalized dishes grounded in Velora's menu.</p>
     </div>
 
     <form class="pref-form glass-card" id="preferenceForm">
@@ -197,7 +197,7 @@
     <div class="section__header">
       <p class="eyebrow">Curated for you</p>
       <h2 class="section__title">Your AI recommendations</h2>
-      <p class="section__subtitle">Powered by AI via Puter.js, grounded in Velora's menu.</p>
+      <p class="section__subtitle">Powered by Gemini AI, grounded in Velora's menu.</p>
     </div>
 
     <!-- Loading animation -->
@@ -259,7 +259,7 @@
         <a href="#favorites">Favorites</a>
       </div>
 
-      <p class="footer__note">Built with HTML, CSS &amp; JavaScript · AI powered by Puter.js (no provider API key)</p>
+      <p class="footer__note">Built with HTML, CSS, JavaScript &amp; Gemini AI · API secured by a server-side backend</p>
       <p class="footer__copyright">&copy; 2026 Velora. A Computer Science Mini Project.</p>
     </div>
   </footer>
@@ -271,15 +271,13 @@
       <button class="modal__close" id="modalCloseBtn" aria-label="Close">&times;</button>
       <h3>How Velora's AI works</h3>
       <p class="modal__text">
-        Velora generates recommendations through <strong>Puter.js</strong>, which can route requests to
-        supported AI models without exposing a provider API key in Velora's public source code.
-        The first time you request recommendations, your browser may show a quick, free,
-        one-time Puter sign-in popup so usage is tied to you instead of to Velora's source code.
-        After that, recommendations generate instantly.
+        Velora sends your preferences to its secure backend, which calls <strong>Google Gemini</strong>
+        using a server-side API key. The key is never included in the browser or public frontend.
+        Gemini returns a structured recommendation set, which Velora validates before displaying it.
       </p>
       <div class="modal__actions">
         <button class="btn btn--primary" id="modalGotItBtn">Got it</button>
-        <a href="https://puter.com" target="_blank" rel="noopener" class="btn btn--outline">About Puter.js</a>
+        <a href="https://ai.google.dev/gemini-api/docs/get-started" target="_blank" rel="noopener" class="btn btn--outline">About Gemini API</a>
       </div>
     </div>
   </div>
@@ -287,10 +285,8 @@
   <!-- ===================== TOAST NOTIFICATION ===================== -->
   <div class="toast" id="toast"></div>
 
-  <!-- Scripts: data first, then Puter.js (free, keyless AI engine),
-       then the AI module, then main app logic -->
+  <!-- Scripts: local menu data, AI API client, then main app logic -->
   <script src="data.js"></script>
-  <script src="https://js.puter.com/v2/"></script>
   <script src="ai.js"></script>
   <script src="script.js"></script>
 </body>
