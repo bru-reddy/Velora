@@ -13,7 +13,7 @@ JavaScript (ES6)** — no frameworks, no backend, no database.
 Traditional restaurant menus are static — every customer sees the same list
 of dishes regardless of their taste, mood, or dietary needs. Velora solves
 this by combining a locally curated dataset of 76 dishes with the
-reasoning power of **Grok**, xAI's AI model. Users fill out a short
+reasoning power of **AI models available through Puter.js. Users fill out a short
 preference form (diet type, cuisine, budget, spice level, meal type,
 calories, allergies, and mood), and the AI responds with six personalized
 dish recommendations — each with a short description, an estimated price
@@ -32,7 +32,7 @@ manage, thanks to Puter.js (see below).
 - 🔍 **Search bar** — instantly search all 76 dishes by name, cuisine, or description
 - 🍜 **Food categories** — filter the catalog by cuisine using chip buttons
 - 📝 **Preference form** — collects diet type, cuisine, budget, spice level, meal type, calories, allergies, and mood
-- 🤖 **AI-powered recommendations** — Grok (xAI) generates 6 personalized dishes with reasons and health scores
+- 🤖 **AI-powered recommendations** — an AI model generates 6 personalized dishes with reasons and health scores
 - 🆓 **Zero-config AI** — no signup, no API key, no billing setup; powered by Puter.js's free "User-Pays" model
 - 💛 **Favorites system** — save/unsave any dish with one click, persisted in Local Storage
 - ⏳ **Loading animation** — animated plate/spinner while waiting on the AI
@@ -50,7 +50,7 @@ manage, thanks to Puter.js (see below).
 | HTML5                    | Page structure & semantic markup             |
 | CSS3                     | Styling, glassmorphism, animations, responsive layout |
 | JavaScript (ES6)         | App logic, DOM rendering, state management    |
-| Puter.js + Grok (xAI)     | Free, keyless AI-generated personalized recommendations |
+| Puter.js AI     | AI-generated personalized recommendations without exposing a provider API key |
 | Local Storage (Web API)  | Persisting favorites                          |
 | Google Fonts             | Fraunces (display), Plus Jakarta Sans (body), JetBrains Mono (data) |
 
@@ -112,7 +112,7 @@ Velora has zero build steps — it's plain static HTML/CSS/JS.
 
 ## 🤖 AI Setup (Zero Configuration)
 
-Velora generates recommendations using **Grok** (xAI), accessed through
+Velora generates recommendations using AI models through **Puter.js**, accessed through
 **[Puter.js](https://puter.com)** — no API key required.
 
 Why this matters for a static, no-backend project: calling an AI provider's
@@ -124,17 +124,15 @@ each visitor's own free Puter account (not Velora's code) covers their
 usage. There is nothing to sign up for as the developer, nothing to embed,
 and nothing to leak.
 
-**Nothing to configure** — just open the app and click **✨ Get AI
-Recommendations**. The first time, your browser may show a quick, free,
-one-time Puter sign-in popup (a few seconds); after that, it won't ask
-again.
+**Nothing to configure in Velora** — open the app and click **✨ Get AI
+Recommendations**. Puter may ask the visitor to authenticate before AI usage.
 
 **Want to switch models?** Puter.js gives every model — Grok, Gemini, GPT,
 Claude, and 400+ others — the same `puter.ai.chat()` call. Open `ai.js` and
 change the single `AI_MODEL` constant near the top of the file:
 
 ```js
-const AI_MODEL = "x-ai/grok-4-1-fast"; // change to "google/gemini-3.5-flash", "openai/gpt-5.4-nano", etc.
+const AI_MODEL = "gpt-5.6-luna"; // ai.js also has a GPT-5 nano fallback
 ```
 
 See the [full model list](https://developer.puter.com/tutorials/free-llm-api/)
@@ -151,7 +149,7 @@ for other options.
    grounded in Velora's actual menu.
 3. It calls `puter.ai.chat(prompt, { model: AI_MODEL })` — Puter.js (loaded
    via `<script src="https://js.puter.com/v2/">` in `index.html`) routes
-   this to Grok with no API key and no `fetch()` boilerplate.
+   this to the selected AI model without exposing a provider API key or requiring direct `fetch()` calls.
 4. The model is instructed to reply with **strict JSON only** — the
    response is parsed safely (with a fallback that strips markdown code
    fences if the model adds them).
