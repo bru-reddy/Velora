@@ -6,11 +6,11 @@
    in this public frontend.
    ========================================================= */
 
-const DEFAULT_API_URL = "https://velora-api.onrender.com";
+const DEFAULT_API_URL = "https://velora-api-pgey.onrender.com";
 
 function getApiBaseUrl() {
   if (window.VELORA_API_URL) {
-    return window.VELORA_API_URL.replace(/\\/$/, "");
+    return window.VELORA_API_URL.replace(/\/$/, "");
   }
 
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
