@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: velora-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: FRONTEND_ORIGIN
+        value: https://bru-reddy.github.io
