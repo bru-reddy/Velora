@@ -314,7 +314,7 @@ async function handlePreferenceSubmit(e) {
   showLoading();
 
   try {
-    const recommendations = await getAIRecommendations(prefs);
+    const recommendations = await window.getAIRecommendations(prefs);
     renderRecommendations(recommendations);
   } catch (err) {
     console.error(err);
@@ -439,7 +439,7 @@ function clampScore(score) {
 /* =========================================================
    ABOUT AI MODAL
    -----------------------------------------------------------
-   No API key to manage anymore — Puter.js handles auth for us.
+   Gemini API access is handled securely by the server-side backend.
    This modal is just a short explainer, opened from the navbar.
    ========================================================= */
 function setupAiInfoModal() {
