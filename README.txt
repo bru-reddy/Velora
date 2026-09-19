@@ -1,69 +1,123 @@
-# 🍽️ Velora — AI Powered Personalized Menu Recommendation System
+# Velora — AI-Powered Personalized Menu Recommendation System
 
-Velora is a fully client-side web application that recommends dishes tailored
-to a user's mood, diet, budget, and cravings using **Grok (xAI)**, accessed
-for free through **Puter.js** — no API key required. It was built as a 2nd
-semester Computer Science mini project using only **HTML5, CSS3, and vanilla
-JavaScript (ES6)** — no frameworks, no backend, no database.
+Velora is a personalized food discovery application that combines a curated menu dataset with Gemini AI to recommend dishes based on diet, cuisine, budget, spice level, meal type, calorie preference, allergies, and mood.
 
----
+## Architecture
 
-## 📖 Project Overview
+Browser / GitHub Pages
+        |
+        | POST /api/recommendations
+        v
+Velora API / Render
+        |
+        | @google/genai
+        v
+Google Gemini API
 
-Traditional restaurant menus are static — every customer sees the same list
-of dishes regardless of their taste, mood, or dietary needs. Velora solves
-this by combining a locally curated dataset of 76 dishes with the
-reasoning power of **Grok**, xAI's AI model. Users fill out a short
-preference form (diet type, cuisine, budget, spice level, meal type,
-calories, allergies, and mood), and the AI responds with six personalized
-dish recommendations — each with a short description, an estimated price
-and calorie count, a human-style explanation of *why* it was picked, and a
-health score.
+The Gemini API key is stored only on the backend and is never shipped to the browser.
 
-Everything runs in the browser. Favorites are persisted using the browser's
-**Local Storage**, so no server or database is required. The AI itself
-requires **zero configuration** — there's no API key to create, paste, or
-manage, thanks to Puter.js (see below).
+## Features
 
----
+- Search across the menu
+- Cuisine filtering
+- Personalized AI recommendations
+- Dietary and allergy-aware prompts
+- Budget, calorie, spice, meal, and mood preferences
+- Health-score visualization
+- Local favorites
+- Responsive UI
+- Structured Gemini JSON output
+- Backend validation and sanitization
+- Rate limiting
+- CORS protection
+- Security headers
+- Compression
+- Render deployment configuration
+- Health-check endpoint
 
-## ✨ Features
+## Repository structure
 
-- 🔍 **Search bar** — instantly search all 76 dishes by name, cuisine, or description
-- 🍜 **Food categories** — filter the catalog by cuisine using chip buttons
-- 📝 **Preference form** — collects diet type, cuisine, budget, spice level, meal type, calories, allergies, and mood
-- 🤖 **AI-powered recommendations** — Grok (xAI) generates 6 personalized dishes with reasons and health scores
-- 🆓 **Zero-config AI** — no signup, no API key, no billing setup; powered by Puter.js's free "User-Pays" model
-- 💛 **Favorites system** — save/unsave any dish with one click, persisted in Local Storage
-- ⏳ **Loading animation** — animated plate/spinner while waiting on the AI
-- ⚠️ **Error handling** — friendly error state with a "Try Again" button if the AI call fails
-- 🈳 **Empty states** — helpful messaging when no dishes match a search or no recommendations exist yet
-- 📱 **Fully responsive** — mobile-first layout with a collapsible navigation menu
-- 🎨 **Modern glassmorphism UI** — soft shadows, rounded cards, an animated aurora-gradient hero, and smooth hover/scroll animations
+Velora/
+├── index.html
+├── style.css
+├── script.js
+├── ai.js
+├── data.js
+├── backend/
+│   ├── package.json
+│   ├── .env.example
+│   ├── README.md
+│   └── src/server.js
+├── render.yaml
+├── .gitignore
+└── README.md
 
----
+## Local setup
 
-## 🛠️ Technologies Used
+Frontend:
 
-| Technology              | Purpose                                      |
-|--------------------------|-----------------------------------------------|
-| HTML5                    | Page structure & semantic markup             |
-| CSS3                     | Styling, glassmorphism, animations, responsive layout |
-| JavaScript (ES6)         | App logic, DOM rendering, state management    |
-| Puter.js + Grok (xAI)     | Free, keyless AI-generated personalized recommendations |
-| Local Storage (Web API)  | Persisting favorites                          |
-| Google Fonts             | Fraunces (display), Plus Jakarta Sans (body), JetBrains Mono (data) |
+    python -m http.server 5500
 
-No React, Next.js, Tailwind, Bootstrap, jQuery, Node.js/Express, or any
-database is used anywhere in this project. No API key management or backend
-proxy is needed for the AI either — Puter.js calls the model directly from
-the browser.
+Backend:
 
+    cd backend
+    copy .env.example .env
+    npm install
+    npm start
 
+Set these backend environment variables:
 
-## 👨‍💻 Author's Note
+    GEMINI_API_KEY=your_key_here
+    GEMINI_MODEL=gemini-3.8-flash
+    FRONTEND_ORIGIN=http://localhost:5500
+    PORT=10000
 
-This project was built as a Computer Science mini project to demonstrate
-DOM manipulation, API integration, responsive design, and client-side data
-persistence — all using only foundational web technologies, without relying
-on any frontend framework or backend server.
+The API runs at http://localhost:10000 and exposes /health and /api/recommendations.
+
+## Production deployment
+
+The repository includes render.yaml for the backend.
+
+1. Deploy the repository's backend service to Render.
+2. Use backend as the service root directory.
+3. Use npm install as the build command and npm start as the start command.
+4. Add GEMINI_API_KEY as a Render secret.
+5. Set GEMINI_MODEL to gemini-3.8-flash.
+6. Set FRONTEND_ORIGIN to the deployed frontend origin.
+7. Verify the /health endpoint.
+
+Google's current JavaScript SDK is @google/genai. Google documents server-side API-key usage through environment variables and structured JSON output through response schemas.
+
+## Security
+
+The backend uses Helmet, CORS restrictions, compression, JSON request-size limits, rate limiting, input normalization, model-output validation, and sanitized API errors.
+
+The Gemini key is never stored in index.html, ai.js, GitHub Pages, or other public frontend files.
+
+## Roadmap
+
+- User authentication
+- PostgreSQL persistence
+- Cloud favorites
+- Recommendation history
+- Feedback and ratings
+- Regenerate recommendations
+- Advanced filtering
+- Restaurant/menu administration
+- Analytics
+- PWA support
+- Automated tests
+- CI/CD
+- Structured logging and observability
+- Accessibility improvements
+- Richer dish imagery and metadata
+
+## Technology stack
+
+Frontend: HTML5, CSS3, vanilla JavaScript, Local Storage
+Backend: Node.js, Express, Google Gen AI SDK, Gemini, Helmet, CORS, Compression, Express Rate Limit
+Deployment: GitHub Pages + Render
+
+## Author
+
+Velora is a Computer Science project focused on frontend engineering, backend API design, AI integration, validation, security fundamentals, and deployment.
