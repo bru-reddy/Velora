@@ -47,7 +47,7 @@
 
    Full list: https://developer.puter.com/tutorials/free-llm-api/
    ------------------------------------------------------------- */
-const AI_MODEL = "x-ai/grok-4-1-fast";
+const AI_MODEL = "gpt-5.6-luna";
 
 /**
  * Builds the natural-language instruction prompt sent to the AI.
@@ -149,14 +149,28 @@ async function callPuterAI(prompt) {
   try {
     response = await puter.ai.chat(prompt, {
       model: AI_MODEL,
-      temperature: 0.8,
-      max_tokens: 1500,
+      temperature: 0.7,
+      max_tokens: 1800,
+      normalize: true,
     });
   } catch (err) {
     throw new Error(err?.message || "The AI request failed. Please try again.");
   }
 
-  const text = response?.message?.content ?? response?.text ?? (typeof response === "string" ? response : null);
+  const contentValue =
+    response?.message?.content ??
+    response?.text ??
+    (typeof response === "string" ? response : null);
+
+  const text = Array.isArray(contentValue)
+    ? contentValue
+        .map((part) =>
+          typeof part === "string"
+            ? part
+            : part?.text || part?.content || ""
+        )
+        .join("")
+    : contentValue;
 
   if (!text) {
     throw new Error("The AI returned an empty response. Please try again.");
