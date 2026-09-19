@@ -145,38 +145,48 @@ async function callPuterAI(prompt) {
     );
   }
 
-  let response;
-  try {
-    response = await puter.ai.chat(prompt, {
-      model: AI_MODEL,
-      temperature: 0.7,
-      max_tokens: 1800,
-      normalize: true,
-    });
-  } catch (err) {
-    throw new Error(err?.message || "The AI request failed. Please try again.");
+  const modelsToTry = [AI_MODEL, "gpt-5-nano"];
+
+  let lastError = null;
+
+  for (const model of [...new Set(modelsToTry)]) {
+    try {
+      const response = await puter.ai.chat(prompt, {
+        model,
+        temperature: 0.7,
+        max_tokens: 1800,
+        normalize: true,
+      });
+
+      const contentValue =
+        response?.message?.content ??
+        response?.text ??
+        (typeof response === "string" ? response : null);
+
+      const text = Array.isArray(contentValue)
+        ? contentValue
+            .map((part) =>
+              typeof part === "string"
+                ? part
+                : part?.text || part?.content || ""
+            )
+            .join("")
+        : contentValue;
+
+      if (!text) {
+        throw new Error("The AI returned an empty response.");
+      }
+
+      return text;
+    } catch (err) {
+      lastError = err;
+      console.warn("Velora AI model failed:", model, err);
+    }
   }
 
-  const contentValue =
-    response?.message?.content ??
-    response?.text ??
-    (typeof response === "string" ? response : null);
-
-  const text = Array.isArray(contentValue)
-    ? contentValue
-        .map((part) =>
-          typeof part === "string"
-            ? part
-            : part?.text || part?.content || ""
-        )
-        .join("")
-    : contentValue;
-
-  if (!text) {
-    throw new Error("The AI returned an empty response. Please try again.");
-  }
-
-  return text;
+  throw new Error(
+    lastError?.message || "The AI request failed. Please try again."
+  );
 }
 
 /**
