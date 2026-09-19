@@ -1,202 +1,123 @@
-# 🍽️ Velora — AI Powered Personalized Menu Recommendation System
+# Velora — AI-Powered Personalized Menu Recommendation System
 
-Velora is a fully client-side web application that recommends dishes tailored
-to a user's mood, diet, budget, and cravings using **Grok (xAI)**, accessed
-for free through **Puter.js** — no API key required. It was built as a 2nd
-semester Computer Science mini project using only **HTML5, CSS3, and vanilla
-JavaScript (ES6)** — no frameworks, no backend, no database.
+Velora is a personalized food discovery application that combines a curated menu dataset with Gemini AI to recommend dishes based on diet, cuisine, budget, spice level, meal type, calorie preference, allergies, and mood.
 
----
+## Architecture
 
-## 📖 Project Overview
+Browser / GitHub Pages
+        |
+        | POST /api/recommendations
+        v
+Velora API / Render
+        |
+        | @google/genai
+        v
+Google Gemini API
 
-Traditional restaurant menus are static — every customer sees the same list
-of dishes regardless of their taste, mood, or dietary needs. Velora solves
-this by combining a locally curated dataset of 76 dishes with the
-reasoning power of **AI models available through Puter.js. Users fill out a short
-preference form (diet type, cuisine, budget, spice level, meal type,
-calories, allergies, and mood), and the AI responds with six personalized
-dish recommendations — each with a short description, an estimated price
-and calorie count, a human-style explanation of *why* it was picked, and a
-health score.
+The Gemini API key is stored only on the backend and is never shipped to the browser.
 
-Everything runs in the browser. Favorites are persisted using the browser's
-**Local Storage**, so no server or database is required. The AI itself
-requires **zero configuration** — there's no API key to create, paste, or
-manage, thanks to Puter.js (see below).
+## Features
 
----
+- Search across the menu
+- Cuisine filtering
+- Personalized AI recommendations
+- Dietary and allergy-aware prompts
+- Budget, calorie, spice, meal, and mood preferences
+- Health-score visualization
+- Local favorites
+- Responsive UI
+- Structured Gemini JSON output
+- Backend validation and sanitization
+- Rate limiting
+- CORS protection
+- Security headers
+- Compression
+- Render deployment configuration
+- Health-check endpoint
 
-## ✨ Features
+## Repository structure
 
-- 🔍 **Search bar** — instantly search all 76 dishes by name, cuisine, or description
-- 🍜 **Food categories** — filter the catalog by cuisine using chip buttons
-- 📝 **Preference form** — collects diet type, cuisine, budget, spice level, meal type, calories, allergies, and mood
-- 🤖 **AI-powered recommendations** — an AI model generates 6 personalized dishes with reasons and health scores
-- 🆓 **Zero-config AI** — no signup, no API key, no billing setup; powered by Puter.js's free "User-Pays" model
-- 💛 **Favorites system** — save/unsave any dish with one click, persisted in Local Storage
-- ⏳ **Loading animation** — animated plate/spinner while waiting on the AI
-- ⚠️ **Error handling** — friendly error state with a "Try Again" button if the AI call fails
-- 🈳 **Empty states** — helpful messaging when no dishes match a search or no recommendations exist yet
-- 📱 **Fully responsive** — mobile-first layout with a collapsible navigation menu
-- 🎨 **Modern glassmorphism UI** — soft shadows, rounded cards, an animated aurora-gradient hero, and smooth hover/scroll animations
-
----
-
-## 🛠️ Technologies Used
-
-| Technology              | Purpose                                      |
-|--------------------------|-----------------------------------------------|
-| HTML5                    | Page structure & semantic markup             |
-| CSS3                     | Styling, glassmorphism, animations, responsive layout |
-| JavaScript (ES6)         | App logic, DOM rendering, state management    |
-| Puter.js AI     | AI-generated personalized recommendations without exposing a provider API key |
-| Local Storage (Web API)  | Persisting favorites                          |
-| Google Fonts             | Fraunces (display), Plus Jakarta Sans (body), JetBrains Mono (data) |
-
-No React, Next.js, Tailwind, Bootstrap, jQuery, Node.js/Express, or any
-database is used anywhere in this project. No API key management or backend
-proxy is needed for the AI either — Puter.js calls the model directly from
-the browser.
-
----
-
-## 📁 Folder Structure
-
-```
 Velora/
-│── index.html          # Main HTML page — all sections (nav, hero, form, etc.)
-│── style.css            # All styling: glassmorphism, layout, responsiveness
-│── script.js             # App logic: rendering, filters, favorites, form handling
-│── ai.js                  # Reusable AI integration module (Puter.js + Grok)
-│── data.js                 # Local dataset of 76 dishes + cuisine list
-│── README.md                # This file
-│── assets/
-│     ├── images/              # (optional) food photography / backgrounds
-│     └── icons/                # (optional) custom icon assets
-```
+├── index.html
+├── style.css
+├── script.js
+├── ai.js
+├── data.js
+├── backend/
+│   ├── package.json
+│   ├── .env.example
+│   ├── README.md
+│   └── src/server.js
+├── render.yaml
+├── .gitignore
+└── README.md
 
-**Script load order matters:** `data.js` → `ai.js` → `script.js`, since
-`ai.js` reads from `DISH_DATA` and `script.js` calls functions from both.
+## Local setup
 
----
+Frontend:
 
-## 🚀 Setup Instructions
+    python -m http.server 5500
 
-Velora has zero build steps — it's plain static HTML/CSS/JS.
+Backend:
 
-1. **Download or clone** this project folder.
-2. Open the `Velora` folder.
-3. Double-click `index.html` to open it directly in your browser, **or**
-   serve it locally for the best experience:
+    cd backend
+    copy .env.example .env
+    npm install
+    npm start
 
-   ```bash
-   # Using Python (any OS with Python installed)
-   cd Velora
-   python -m http.server 5500
-   ```
+Set these backend environment variables:
 
-   Then visit `http://localhost:5500` in your browser.
+    GEMINI_API_KEY=your_key_here
+    GEMINI_MODEL=gemini-3.8-flash
+    FRONTEND_ORIGIN=http://localhost:5500
+    PORT=10000
 
-4. Scroll to **Get Recommendations**, fill out your preferences, and click
-   **✨ Get AI Recommendations**. That's it — no key, no signup, no config.
+The API runs at http://localhost:10000 and exposes /health and /api/recommendations.
 
-> 💡 A local web server (step 3) is recommended over opening the file
-> directly, since some browsers restrict network calls from `file://`
-> pages. The first time you request recommendations, Puter.js may show a
-> quick, free, one-time sign-in popup so AI usage is tied to your visit
-> instead of to Velora's source code — click the **🤖 Powered by AI**
-> button in the navbar for details.
+## Production deployment
 
----
+The repository includes render.yaml for the backend.
 
-## 🤖 AI Setup (Zero Configuration)
+1. Deploy the repository's backend service to Render.
+2. Use backend as the service root directory.
+3. Use npm install as the build command and npm start as the start command.
+4. Add GEMINI_API_KEY as a Render secret.
+5. Set GEMINI_MODEL to gemini-3.8-flash.
+6. Set FRONTEND_ORIGIN to the deployed frontend origin.
+7. Verify the /health endpoint.
 
-Velora generates recommendations using AI models through **Puter.js**, accessed through
-**[Puter.js](https://puter.com)** — no API key required.
+Google's current JavaScript SDK is @google/genai. Google documents server-side API-key usage through environment variables and structured JSON output through response schemas.
 
-Why this matters for a static, no-backend project: calling an AI provider's
-REST API straight from the browser normally means either embedding a secret
-key in public source code (anyone can steal it from DevTools) or making
-every visitor create a developer account. Puter.js sidesteps both with a
-"User-Pays" model — it's a single `<script>` tag that proxies AI calls, and
-each visitor's own free Puter account (not Velora's code) covers their
-usage. There is nothing to sign up for as the developer, nothing to embed,
-and nothing to leak.
+## Security
 
-**Nothing to configure in Velora** — open the app and click **✨ Get AI
-Recommendations**. Puter may ask the visitor to authenticate before AI usage.
+The backend uses Helmet, CORS restrictions, compression, JSON request-size limits, rate limiting, input normalization, model-output validation, and sanitized API errors.
 
-**Want to switch models?** Puter.js gives every model — Grok, Gemini, GPT,
-Claude, and 400+ others — the same `puter.ai.chat()` call. Open `ai.js` and
-change the single `AI_MODEL` constant near the top of the file:
+The Gemini key is never stored in index.html, ai.js, GitHub Pages, or other public frontend files.
 
-```js
-const AI_MODEL = "gpt-5.6-luna"; // ai.js also has a GPT-5 nano fallback
-```
+## Roadmap
 
-See the [full model list](https://developer.puter.com/tutorials/free-llm-api/)
-for other options.
+- User authentication
+- PostgreSQL persistence
+- Cloud favorites
+- Recommendation history
+- Feedback and ratings
+- Regenerate recommendations
+- Advanced filtering
+- Restaurant/menu administration
+- Analytics
+- PWA support
+- Automated tests
+- CI/CD
+- Structured logging and observability
+- Accessibility improvements
+- Richer dish imagery and metadata
 
----
+## Technology stack
 
-## 🧠 How the AI Integration Works (`ai.js`)
+Frontend: HTML5, CSS3, vanilla JavaScript, Local Storage
+Backend: Node.js, Express, Google Gen AI SDK, Gemini, Helmet, CORS, Compression, Express Rate Limit
+Deployment: GitHub Pages + Render
 
-1. `getAIRecommendations(prefs)` is the single reusable function called by
-   `script.js`.
-2. It builds a detailed prompt combining the user's preferences with a
-   relevant sample of dishes from `data.js`, so the AI's suggestions stay
-   grounded in Velora's actual menu.
-3. It calls `puter.ai.chat(prompt, { model: AI_MODEL })` — Puter.js (loaded
-   via `<script src="https://js.puter.com/v2/">` in `index.html`) routes
-   this to the selected AI model without exposing a provider API key or requiring direct `fetch()` calls.
-4. The model is instructed to reply with **strict JSON only** — the
-   response is parsed safely (with a fallback that strips markdown code
-   fences if the model adds them).
-5. The parsed array of recommendation objects is returned to `script.js`,
-   which renders them as recommendation cards.
-6. Any failure (Puter.js failed to load, network error, malformed response)
-   throws a descriptive error that the UI displays in a friendly error
-   state.
+## Author
 
----
-
-## 🍱 Dataset (`data.js`)
-
-The local dataset contains **76 dishes** across 8 cuisines:
-
-- North Indian (12)
-- South Indian (10)
-- Chinese (10)
-- Italian (10)
-- Mexican (9)
-- Japanese (9)
-- Desserts (8)
-- Beverages (8)
-
-Each dish object includes: `name`, `cuisine`, `type` (veg/non-veg), `meal`
-type, `price`, `calories`, `spice` level, an `emoji`, and a short
-`desc`ription. This dataset powers both the browsable catalog and the
-context given to the AI when generating recommendations.
-
----
-
-## 🔮 Future Enhancements
-
-- Add a backend + database to support multi-device favorites and user accounts
-- Add dish images instead of emoji icons
-- Add a "regenerate" button to get a fresh set of AI recommendations without resubmitting the form
-- Add multi-language support for menu descriptions
-- Add a rating/feedback system to fine-tune future AI suggestions
-- Add voice-based preference input using the Web Speech API
-- Add a dark/light theme toggle
-- Deploy as a Progressive Web App (PWA) for offline access to the dish catalog
-
----
-
-## 👨‍💻 Author's Note
-
-This project was built as a Computer Science mini project to demonstrate
-DOM manipulation, API integration, responsive design, and client-side data
-persistence — all using only foundational web technologies, without relying
-on any frontend framework or backend server.
+Velora is a Computer Science project focused on frontend engineering, backend API design, AI integration, validation, security fundamentals, and deployment.
