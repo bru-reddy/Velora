@@ -4,10 +4,14 @@
   "private": true,
   "description": "Production API for Velora AI-powered menu recommendations",
   "type": "module",
-  "engines": { "node": ">=20 <25" },
-  "scripts": { "start": "node src/server.js", "dev": "node --watch src/server.js" },
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
   "dependencies": {
-    "@google/genai": "^2.23.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
