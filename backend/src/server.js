@@ -267,7 +267,10 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
       message
     });
 
-    let diagnostic = "Gemini request failed.";
+    let diagnostic = status
+      ? "Gemini API error (HTTP " + status + ")."
+      : "Gemini request failed.";
+
     if (status === 400) {
       diagnostic = "Gemini rejected the recommendation request (HTTP 400).";
     } else if (status === 401 || status === 403) {
@@ -277,12 +280,17 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
     } else if (status === 429) {
       diagnostic = "Gemini rate limit or quota was exceeded.";
     } else if (status >= 500) {
-      diagnostic = "Gemini returned a server-side error. Please retry.";
+      diagnostic = "Gemini returned a server-side error (HTTP " + status + ").";
     }
+
+    const safeMessage = message
+      .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted]")
+      .replace(/https?:\/\/[^\s]+/g, "[url redacted]")
+      .slice(0, 300);
 
     return res.status(502).json({
       error: "The AI recommendation service is temporarily unavailable.",
-      diagnostic
+      diagnostic: safeMessage ? diagnostic + " " + safeMessage : diagnostic
     });
   }
 });
