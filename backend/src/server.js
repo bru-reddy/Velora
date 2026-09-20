@@ -231,7 +231,6 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
       model: GEMINI_MODEL,
       contents: buildPrompt(prefs, safeMenu),
       config: {
-        temperature: 0.55,
         maxOutputTokens: 1800,
         responseMimeType: "application/json",
         responseSchema: recommendationSchema
