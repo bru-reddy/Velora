@@ -231,7 +231,10 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
       model: GEMINI_MODEL,
       contents: buildPrompt(prefs, safeMenu),
       config: {
-        maxOutputTokens: 1800,
+        maxOutputTokens: 4096,
+        thinkingConfig: {
+          thinkingLevel: "low"
+        },
         responseMimeType: "application/json",
         responseSchema: recommendationSchema
       }
