@@ -245,13 +245,10 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
         ],
         temperature: 0.4,
         max_completion_tokens: 2048,
+        // JSON Object Mode avoids schema-generation 400s while we still
+        // validate the returned recommendation structure on the server.
         response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "velora_recommendations",
-            strict: true,
-            schema: recommendationSchema
-          }
+          type: "json_object"
         }
       })
     });
