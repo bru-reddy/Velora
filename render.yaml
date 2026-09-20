@@ -7,7 +7,7 @@ services:
     startCommand: npm start
     healthCheckPath: /health
     envVars:
-      - key: GEMINI_MODEL
-        value: gemini-3.8-flash
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
       - key: FRONTEND_ORIGIN
         value: https://bru-reddy.github.io
