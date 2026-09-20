@@ -26,6 +26,7 @@ const configuredOrigins = FRONTEND_ORIGIN
 
 const allowedOrigins = new Set([
   "https://bru-reddy.github.io",
+  "https://velora-frontend-lx66.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
   ...configuredOrigins,
