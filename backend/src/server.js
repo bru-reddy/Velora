@@ -258,9 +258,30 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
       model: GEMINI_MODEL
     });
   } catch (error) {
-    console.error("Velora Gemini request failed:", error);
+    const status = Number(error?.status || error?.response?.status || 0);
+    const message = String(error?.message || "");
+
+    console.error("Velora Gemini request failed:", {
+      status,
+      message
+    });
+
+    let diagnostic = "Gemini request failed.";
+    if (status === 400) {
+      diagnostic = "Gemini rejected the recommendation request (HTTP 400).";
+    } else if (status === 401 || status === 403) {
+      diagnostic = "Gemini authentication or API access failed. Check the Render GEMINI_API_KEY and Gemini API access.";
+    } else if (status === 404) {
+      diagnostic = "The configured Gemini model or API endpoint was not found.";
+    } else if (status === 429) {
+      diagnostic = "Gemini rate limit or quota was exceeded.";
+    } else if (status >= 500) {
+      diagnostic = "Gemini returned a server-side error. Please retry.";
+    }
+
     return res.status(502).json({
-      error: "The AI recommendation service is temporarily unavailable. Please try again."
+      error: "The AI recommendation service is temporarily unavailable.",
+      diagnostic
     });
   }
 });
