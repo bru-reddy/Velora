@@ -85,9 +85,10 @@ window.getAIRecommendations = async function getAIRecommendations(prefs) {
   }
 
   if (!response.ok) {
-    throw new Error(
-      payload?.error || "Velora's AI service is temporarily unavailable. Please try again."
-    );
+    const baseMessage =
+      payload?.error || "Velora's AI service is temporarily unavailable. Please try again.";
+    const diagnostic = payload?.diagnostic ? String(payload.diagnostic) : "";
+    throw new Error(diagnostic ? baseMessage + " " + diagnostic : baseMessage);
   }
 
   return validateRecommendations(payload.recommendations);
