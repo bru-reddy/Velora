@@ -228,18 +228,53 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
   });
 
   try {
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: buildPrompt(prefs, safeMenu),
-      config: {
-        maxOutputTokens: 4096,
-        thinkingConfig: {
-          thinkingLevel: "low"
-        },
-        responseMimeType: "application/json",
-        responseSchema: recommendationSchema
+    const modelsToTry = Array.from(new Set([
+      GEMINI_MODEL,
+      "gemini-3.6-flash",
+      "gemini-3.5-flash-lite"
+    ]));
+
+    let response = null;
+    let usedModel = GEMINI_MODEL;
+    let lastError = null;
+
+    for (const model of modelsToTry) {
+      try {
+        response = await ai.models.generateContent({
+          model,
+          contents: buildPrompt(prefs, safeMenu),
+          config: {
+            maxOutputTokens: 4096,
+            thinkingConfig: {
+              thinkingLevel: "low"
+            },
+            responseMimeType: "application/json",
+            responseSchema: recommendationSchema
+          }
+        });
+
+        usedModel = model;
+        break;
+      } catch (error) {
+        lastError = error;
+        const status = Number(error?.status || error?.response?.status || 0);
+
+        // Gemini can temporarily return 503 when a model is under high demand.
+        // Fall back to another supported Flash model instead of failing the user.
+        if (status !== 503 && status !== 500) {
+          throw error;
+        }
+
+        console.warn("Gemini model unavailable; trying fallback:", {
+          model,
+          status
+        });
       }
-    });
+    }
+
+    if (!response) {
+      throw lastError || new Error("All Gemini models were unavailable.");
+    }
 
     if (!response.text) throw new Error("Gemini returned an empty response.");
 
@@ -256,7 +291,7 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
 
     return res.json({
       recommendations: sanitizeRecommendations(parsed, safeMenu),
-      model: GEMINI_MODEL
+      model: usedModel
     });
   } catch (error) {
     const status = Number(error?.status || error?.response?.status || 0);
