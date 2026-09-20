@@ -3,19 +3,17 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
-import { GoogleGenAI } from "@google/genai";
+
 
 const app = express();
 const PORT = Number(process.env.PORT) || 10000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "";
 
-if (!GEMINI_API_KEY) {
-  console.warn("GEMINI_API_KEY is not configured. AI recommendations will be unavailable.");
+if (!GROQ_API_KEY) {
+  console.warn("GROQ_API_KEY is not configured. AI recommendations will be unavailable.");
 }
-
-const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
 // Keep the deployed GitHub Pages frontend allowed even if Render's
 // FRONTEND_ORIGIN environment variable is missing or stale.
@@ -77,18 +75,16 @@ const recommendationSchema = {
   properties: {
     recommendations: {
       type: "array",
-      minItems: 6,
-      maxItems: 6,
       items: {
         type: "object",
         properties: {
           name: { type: "string" },
           cuisine: { type: "string" },
           description: { type: "string" },
-          price: { type: "integer", minimum: 0 },
-          calories: { type: "integer", minimum: 0 },
+          price: { type: "integer" },
+          calories: { type: "integer" },
           reason: { type: "string" },
-          healthScore: { type: "integer", minimum: 1, maximum: 10 }
+          healthScore: { type: "integer" }
         },
         required: ["name", "cuisine", "description", "price", "calories", "reason", "healthScore"],
         additionalProperties: false
@@ -191,14 +187,15 @@ app.get("/", function (_req, res) {
 app.get("/health", function (_req, res) {
   res.json({
     status: "healthy",
-    aiConfigured: Boolean(GEMINI_API_KEY),
-    model: GEMINI_MODEL,
+    aiConfigured: Boolean(GROQ_API_KEY),
+    provider: "groq",
+    model: GROQ_MODEL,
     timestamp: new Date().toISOString()
   });
 });
 
 app.post("/api/recommendations", recommendationLimiter, async function (req, res) {
-  if (!ai) {
+  if (!GROQ_API_KEY) {
     return res.status(503).json({ error: "AI service is not configured on the server." });
   }
 
@@ -228,98 +225,95 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
   });
 
   try {
-    const modelsToTry = Array.from(new Set([
-      GEMINI_MODEL,
-      "gemini-3.6-flash",
-      "gemini-3.5-flash-lite"
-    ]));
-
-    let response = null;
-    let usedModel = GEMINI_MODEL;
-    let lastError = null;
-
-    for (const model of modelsToTry) {
-      try {
-        response = await ai.models.generateContent({
-          model,
-          contents: buildPrompt(prefs, safeMenu),
-          config: {
-            maxOutputTokens: 4096,
-            thinkingConfig: {
-              thinkingLevel: "low"
-            },
-            responseMimeType: "application/json",
-            responseSchema: recommendationSchema
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + GROQ_API_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: "You are Velora's recommendation engine. Follow the user's preferences and return exactly 6 menu recommendations. Use only dishes from the supplied Velora menu. Never recommend a dish that conflicts with the diet or allergies. Return only JSON matching the supplied schema."
+          },
+          {
+            role: "user",
+            content: buildPrompt(prefs, safeMenu)
           }
-        });
-
-        usedModel = model;
-        break;
-      } catch (error) {
-        lastError = error;
-        const status = Number(error?.status || error?.response?.status || 0);
-
-        // Gemini can temporarily return 503 when a model is under high demand.
-        // Fall back to another supported Flash model instead of failing the user.
-        if (status !== 503 && status !== 500) {
-          throw error;
+        ],
+        temperature: 0.4,
+        max_completion_tokens: 2048,
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "velora_recommendations",
+            strict: true,
+            schema: recommendationSchema
+          }
         }
+      })
+    });
 
-        console.warn("Gemini model unavailable; trying fallback:", {
-          model,
-          status
-        });
-      }
+    const responseText = await response.text();
+    let payload = null;
+
+    try {
+      payload = JSON.parse(responseText);
+    } catch (_error) {
+      payload = null;
     }
 
-    if (!response) {
-      throw lastError || new Error("All Gemini models were unavailable.");
+    if (!response.ok) {
+      const providerMessage = payload?.error?.message || payload?.error?.error || responseText;
+      const error = new Error(String(providerMessage || "Groq request failed."));
+      error.status = response.status;
+      throw error;
     }
 
-    if (!response.text) throw new Error("Gemini returned an empty response.");
+    const content = payload?.choices?.[0]?.message?.content;
+    if (!content) throw new Error("Groq returned an empty response.");
 
     let parsed;
     try {
-      parsed = JSON.parse(response.text);
+      parsed = JSON.parse(content);
     } catch (_error) {
-      throw new Error("Gemini returned invalid JSON.");
+      throw new Error("Groq returned invalid JSON.");
     }
 
     if (!parsed || !Array.isArray(parsed.recommendations) || parsed.recommendations.length !== 6) {
-      throw new Error("Gemini returned an invalid recommendation set.");
+      throw new Error("Groq returned an invalid recommendation set.");
     }
 
     return res.json({
       recommendations: sanitizeRecommendations(parsed, safeMenu),
-      model: usedModel
+      model: GROQ_MODEL,
+      provider: "groq"
     });
   } catch (error) {
-    const status = Number(error?.status || error?.response?.status || 0);
-    const message = String(error?.message || "");
+    const status = Number(error?.status || 0);
+    const message = String(error?.message || "Groq request failed.");
 
-    console.error("Velora Gemini request failed:", {
+    console.error("Velora Groq request failed:", {
       status,
       message
     });
 
     let diagnostic = status
-      ? "Gemini API error (HTTP " + status + ")."
-      : "Gemini request failed.";
+      ? "Groq API error (HTTP " + status + ")."
+      : "Groq request failed.";
 
-    if (status === 400) {
-      diagnostic = "Gemini rejected the recommendation request (HTTP 400).";
-    } else if (status === 401 || status === 403) {
-      diagnostic = "Gemini authentication or API access failed. Check the Render GEMINI_API_KEY and Gemini API access.";
-    } else if (status === 404) {
-      diagnostic = "The configured Gemini model or API endpoint was not found.";
+    if (status === 401 || status === 403) {
+      diagnostic = "Groq authentication or API access failed. Check the Render GROQ_API_KEY.";
     } else if (status === 429) {
-      diagnostic = "Gemini rate limit or quota was exceeded.";
+      diagnostic = "Groq rate limit or quota was exceeded.";
     } else if (status >= 500) {
-      diagnostic = "Gemini returned a server-side error (HTTP " + status + ").";
+      diagnostic = "Groq returned a server-side error (HTTP " + status + ").";
     }
 
     const safeMessage = message
-      .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted]")
+      .replace(/gsk_[0-9A-Za-z_-]+/g, "[redacted]")
       .replace(/https?:\/\/[^\s]+/g, "[url redacted]")
       .slice(0, 300);
 
