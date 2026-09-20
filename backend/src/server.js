@@ -9,7 +9,7 @@ const app = express();
 const PORT = Number(process.env.PORT) || 10000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "";
 
 if (!GEMINI_API_KEY) {
   console.warn("GEMINI_API_KEY is not configured. AI recommendations will be unavailable.");
@@ -17,21 +17,50 @@ if (!GEMINI_API_KEY) {
 
 const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
-const allowedOrigins =
-  FRONTEND_ORIGIN === "*"
-    ? "*"
-    : FRONTEND_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean);
+// Keep the deployed GitHub Pages frontend allowed even if Render's
+// FRONTEND_ORIGIN environment variable is missing or stale.
+const configuredOrigins = FRONTEND_ORIGIN
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
+  "https://bru-reddy.github.io",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  ...configuredOrigins,
+]);
+
+const allowAllOrigins = FRONTEND_ORIGIN.trim() === "*";
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Requests without an Origin header (health checks, curl, server-to-server)
+    // are allowed. Browser origins must be explicitly allowlisted.
+    if (!origin || allowAllOrigins || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Origin is not allowed by Velora API CORS policy."));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  optionsSuccessStatus: 204,
+  credentials: false,
+};
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
+
+// CORS must run before the JSON parser and API routes so GitHub Pages
+// preflight (OPTIONS) requests receive the required headers.
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+
 app.use(express.json({ limit: "32kb" }));
 
 const recommendationLimiter = rateLimit({
