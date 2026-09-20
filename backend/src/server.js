@@ -245,11 +245,9 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
         ],
         temperature: 0.4,
         max_completion_tokens: 2048,
-        // JSON Object Mode avoids schema-generation 400s while we still
-        // validate the returned recommendation structure on the server.
-        response_format: {
-          type: "json_object"
-        }
+        // Use plain text generation and validate/parse the JSON ourselves.
+        // This avoids provider-side JSON generation validation failures.
+        include_reasoning: false
       })
     });
 
@@ -274,7 +272,19 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
 
     let parsed;
     try {
-      parsed = JSON.parse(content);
+      const cleaned = String(content)
+        .replace(/^\\s*\\`\\`\\`(?:json)?\\s*/i, "")
+        .replace(/\\s*\\`\\`\\`\\s*$/i, "")
+        .trim();
+
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch (_directParseError) {
+        const firstBrace = cleaned.indexOf("{");
+        const lastBrace = cleaned.lastIndexOf("}");
+        if (firstBrace === -1 || lastBrace <= firstBrace) throw _directParseError;
+        parsed = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+      }
     } catch (_error) {
       throw new Error("Groq returned invalid JSON.");
     }
