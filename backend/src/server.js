@@ -243,10 +243,11 @@ app.post("/api/recommendations", recommendationLimiter, async function (req, res
             content: buildPrompt(prefs, safeMenu)
           }
         ],
-        temperature: 0.4,
-        max_completion_tokens: 2048,
-        // Use plain text generation and validate/parse the JSON ourselves.
-        // This avoids provider-side JSON generation validation failures.
+        temperature: 0.2,
+        max_completion_tokens: 4096,
+        // GPT-OSS is a reasoning model. Keep reasoning low and exclude it
+        // from the returned message so the JSON has enough output budget.
+        reasoning_effort: "low",
         include_reasoning: false
       })
     });
